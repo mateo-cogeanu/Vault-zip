@@ -1,6 +1,6 @@
 # Vault Zip
 
-[Try Vault Zip](https://htmlpreview.github.io/?https://github.com/mateo-cogeanu/Vault-zip/blob/main/Vault_zip.html)
+[Try Vault Zip](https://vault-zip.tiiny.site/)
 
 Vault Zip is a powerful yet lightweight browser-based tool designed for compressing and archiving files into the `.vz` format. It allows you to efficiently manage and package your files for storage or sharing without the need for additional software. With Vault Zip, users can also extract files from `.vz` archives directly in their browser.
 
