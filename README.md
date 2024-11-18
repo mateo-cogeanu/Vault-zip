@@ -6,10 +6,10 @@ Vault Zip is a powerful yet lightweight browser-based tool designed for compress
 
 ## Features
 
-- **Effortless Compression**: Combine multiple files into a single `.vz` archive, reducing storage space where applicable.
+- **Effortless Compression**: Combine multiple files into a single `.vz` compress, reducing storage space where applicable.
 - **Reliable Decompression**: Quickly extract files from `.vz` archives back to their original state.
 - **User-Friendly Interface**: Intuitive layout and straightforward controls for a seamless user experience.
-- **Browser-Based**: Runs entirely in your browser, ensuring privacy and eliminating the need for installations.
+- **Browser-Based**: Runs entirely in your browser, eliminating the need for installations.
 
 ## How It Works
 
@@ -25,7 +25,6 @@ Vault Zip is a powerful yet lightweight browser-based tool designed for compress
 
 ## Benefits of Vault Zip
 
-- **Secure and Private**: All operations are performed locally in your browser, so your files never leave your device.  
 - **Cross-Platform**: Works on any device with a modern browser, including desktops, tablets, and smartphones.  
 - **Custom Format**: The `.vz` format is specifically designed to offer both archiving and optional compression, making it versatile and efficient.  
 
