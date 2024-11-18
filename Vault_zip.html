@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vault Zip</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #0077ff;
+        }
+
+        .container {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        input[type="file"] {
+            margin: 20px 0;
+            padding: 10px;
+            background: #2c2c2c;
+            border: none;
+            border-radius: 5px;
+            color: #ffffff;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        button {
+            display: inline-block;
+            margin: 10px 5px;
+            padding: 10px 20px;
+            font-size: 1em;
+            color: #ffffff;
+            background-color: #0077ff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #005bb5;
+        }
+
+        #message {
+            margin-top: 20px;
+            font-size: 1em;
+            color: #ff4d4d;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pako/2.0.4/pako.min.js"></script>
+</head>
+<body>
+
+    <h1>Vault Zip</h1>
+
+    <div class="container">
+        <input type="file" id="fileInput" multiple />
+        <button id="compressButton">Compress and Archive Files</button>
+        <button id="decompressButton">Decompress Vault Zip</button>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById("fileInput");
+        const compressButton = document.getElementById("compressButton");
+        const decompressButton = document.getElementById("decompressButton");
+        const message = document.getElementById("message");
+
+        // Helper function to convert ArrayBuffer to Base64
+        function arrayBufferToBase64(buffer) {
+            const binary = new Uint8Array(buffer).reduce((acc, byte) => acc + String.fromCharCode(byte), "");
+            return btoa(binary);
+        }
+
+        // Helper function to convert Base64 to ArrayBuffer
+        function base64ToArrayBuffer(base64) {
+            const binary = atob(base64);
+            const buffer = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                buffer[i] = binary.charCodeAt(i);
+            }
+            return buffer.buffer;
+        }
+
+        // Function to create an archive
+        function createArchive(files) {
+            let archive = [];
+            const promises = [];
+
+            for (let file of files) {
+                const reader = new FileReader();
+                const promise = new Promise((resolve, reject) => {
+                    reader.onload = () => {
+                        const contentBase64 = arrayBufferToBase64(reader.result);
+                        archive.push({ filename: file.name, content: contentBase64 });
+                        resolve();
+                    };
+                    reader.onerror = reject;
+                    reader.readAsArrayBuffer(file);
+                });
+                promises.push(promise);
+            }
+
+            return Promise.all(promises).then(() => archive);
+        }
+
+        // Function to compress archive
+        function compressArchive(archive) {
+            const archiveJSON = JSON.stringify(archive);
+            return pako.gzip(archiveJSON);
+        }
+
+        // Function to decompress archive
+        function decompressArchive(compressedData) {
+            const decompressedJSON = pako.ungzip(compressedData, { to: "string" });
+            return JSON.parse(decompressedJSON);
+        }
+
+        // Event listener for compress button
+        compressButton.addEventListener("click", () => {
+            const files = fileInput.files;
+            if (files.length > 0) {
+                createArchive(files).then(archive => {
+                    const compressedData = compressArchive(archive);
+                    const blob = new Blob([compressedData], { type: "application/octet-stream" });
+                    const link = document.createElement("a");
+                    link.href = URL.createObjectURL(blob);
+                    link.download = "vault.vz";
+                    link.click();
+                    message.textContent = "Files successfully compressed into vault.vz.";
+                    message.style.color = "#00ff00"; // Success message in green
+                }).catch(err => {
+                    message.textContent = "Error during compression: " + err.message;
+                });
+            } else {
+                message.textContent = "Please select files to compress.";
+            }
+        });
+
+        // Event listener for decompress button
+        decompressButton.addEventListener("click", () => {
+            const file = fileInput.files[0];
+            if (file && file.name.endsWith(".vz")) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    try {
+                        const compressedData = new Uint8Array(reader.result);
+                        const archive = decompressArchive(compressedData);
+                        archive.forEach(file => {
+                            const blob = new Blob([base64ToArrayBuffer(file.content)], { type: "application/octet-stream" });
+                            const link = document.createElement("a");
+                            link.href = URL.createObjectURL(blob);
+                            link.download = file.filename;
+                            link.textContent = `Download ${file.filename}`;
+                            document.body.appendChild(link);
+                            document.body.appendChild(document.createElement("br"));
+                        });
+                        message.textContent = "Decompression successful.";
+                        message.style.color = "#00ff00"; // Success message in green
+                    } catch (err) {
+                        message.textContent = "Error during decompression: " + err.message;
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                message.textContent = "Please select a valid .vz file to decompress.";
+            }
+        });
+    </script>
+
+</body>
+</html>
